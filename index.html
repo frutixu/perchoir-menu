@@ -624,7 +624,7 @@ function renderWeek() {
             data-key="${key}"
             onfocus="showAutocomplete(this)"
             oninput="onMealInput(this)"
-            onblur="hideAutocomplete(this)"
+            onblur="onMealBlur(this)"
             onkeydown="handleAutocompleteKey(event, this)"
             autocomplete="off">
           <div class="autocomplete-list" id="ac-${key}"></div>
@@ -641,11 +641,13 @@ function escapeHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function saveMeal(key, value) {
+function saveMealToWeek(key, value) {
   const week = data.weeks[data.currentWeek];
   week.meals[key] = value;
   saveData(data);
-  // Auto-add meal to meals list if it's a new one
+}
+
+function addMealToCatalog(value) {
   if (value && !data.meals.some(m => m.toLowerCase() === value.toLowerCase())) {
     data.meals.push(value);
     data.meals.sort((a, b) => a.localeCompare(b, 'fr'));
@@ -658,7 +660,7 @@ function clearMeal(key) {
   const input = document.querySelector(`[data-key="${key}"]`);
   if (input) {
     input.value = '';
-    saveMeal(key, '');
+    saveMealToWeek(key, '');
   }
 }
 
@@ -733,15 +735,19 @@ function highlightMatch(text, query) {
 
 function onMealInput(input) {
   showAutocomplete(input);
-  saveMeal(input.dataset.key, input.value);
+  saveMealToWeek(input.dataset.key, input.value);
 }
 
-function hideAutocomplete(input) {
+function onMealBlur(input) {
   setTimeout(() => {
     const key = input.dataset.key;
     const list = document.getElementById(`ac-${key}`);
     list.classList.remove('show');
   }, 150);
+  const value = input.value.trim();
+  if (value) {
+    addMealToCatalog(value);
+  }
 }
 
 function selectAutocomplete(key, value) {
@@ -751,12 +757,36 @@ function selectAutocomplete(key, value) {
   div.innerHTML = value;
   const clean = div.textContent;
   input.value = clean;
-  saveMeal(key, clean);
+  saveMealToWeek(key, clean);
   const list = document.getElementById(`ac-${key}`);
   list.classList.remove('show');
 }
 
 function handleAutocompleteKey(event, input) {
+  if (event.key === 'Enter') {
+    const key = input.dataset.key;
+    const list = document.getElementById(`ac-${key}`);
+    const items = list.querySelectorAll('.autocomplete-item');
+    if (list.classList.contains('show') && items.length > 0 && activeAcIndex >= 0) {
+      event.preventDefault();
+      const selected = items[activeAcIndex].textContent;
+      input.value = selected;
+      saveMealToWeek(key, selected);
+      list.classList.remove('show');
+      input.blur();
+    } else {
+      event.preventDefault();
+      const value = input.value.trim();
+      if (value) {
+        saveMealToWeek(key, value);
+        addMealToCatalog(value);
+      }
+      list.classList.remove('show');
+      input.blur();
+    }
+    return;
+  }
+
   const key = input.dataset.key;
   const list = document.getElementById(`ac-${key}`);
   const items = list.querySelectorAll('.autocomplete-item');
@@ -770,13 +800,6 @@ function handleAutocompleteKey(event, input) {
     event.preventDefault();
     activeAcIndex = Math.max(activeAcIndex - 1, 0);
     updateAcHighlight(items);
-  } else if (event.key === 'Enter' && activeAcIndex >= 0) {
-    event.preventDefault();
-    const selected = items[activeAcIndex].textContent;
-    input.value = selected;
-    saveMeal(key, selected);
-    list.classList.remove('show');
-    input.blur();
   } else if (event.key === 'Escape') {
     list.classList.remove('show');
   }
