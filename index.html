@@ -526,6 +526,29 @@
 // ===== Data Layer =====
 const DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 const MEAL_TYPES = ['midi', 'soir'];
+const MONTHS_SHORT = ['janv.', 'fév.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+
+function getMonday(d) {
+  const date = new Date(d);
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+  date.setDate(diff);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function formatDayDate(startDate, dayIndex) {
+  const d = new Date(startDate);
+  d.setDate(d.getDate() + dayIndex);
+  return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
+}
+
+function formatWeekRange(startDate) {
+  const start = new Date(startDate);
+  const end = new Date(startDate);
+  end.setDate(end.getDate() + 6);
+  return `${start.getDate()} ${MONTHS_SHORT[start.getMonth()]} - ${end.getDate()} ${MONTHS_SHORT[end.getMonth()]}`;
+}
 
 const DEFAULT_MEALS = [
   "Aubergines houmous chèvre", "Bagel", "Boudin pommes salade",
@@ -540,7 +563,23 @@ const DEFAULT_MEALS = [
 
 function loadData() {
   const raw = localStorage.getItem('perchoir_data');
-  if (raw) return JSON.parse(raw);
+  if (raw) {
+    const d = JSON.parse(raw);
+    // Migrate weeks without startDate
+    let needsSave = false;
+    d.weeks.forEach((w, i) => {
+      if (!w.startDate) {
+        const mon = getMonday(new Date());
+        mon.setDate(mon.getDate() - (d.weeks.length - 1 - i) * 7);
+        w.startDate = mon.toISOString();
+        needsSave = true;
+      }
+    });
+    if (needsSave) {
+      localStorage.setItem('perchoir_data', JSON.stringify(d));
+    }
+    return d;
+  }
   return initDefaultData();
 }
 
@@ -550,16 +589,18 @@ function initDefaultData() {
     weeks: [],
     currentWeek: 0
   };
-  // Init 4 weeks from the spreadsheet
+  // Init 4 weeks from the spreadsheet, starting 3 weeks ago
+  const baseMonday = getMonday(new Date());
+  baseMonday.setDate(baseMonday.getDate() - 21);
   const spreadsheet = [
     // S1
-    {meals: {"Lundi-midi":"","Lundi-soir":"Gnocchis","Mardi-midi":"Oeufs brouillés lard salade","Mardi-soir":"Aubergines houmous chèvre","Mercredi-midi":"","Mercredi-soir":"","Jeudi-midi":"Guiche","Jeudi-soir":"Camembert maquereau salade","Vendredi-midi":"","Vendredi-soir":"Croque","Samedi-midi":"Pâtes épinard","Samedi-soir":"Coquillette jambon","Dimanche-midi":"Lentilles","Dimanche-soir":"Pâtes au thon"}},
+    {startDate: new Date(baseMonday).toISOString(), meals: {"Lundi-midi":"","Lundi-soir":"Gnocchis","Mardi-midi":"Oeufs brouillés lard salade","Mardi-soir":"Aubergines houmous chèvre","Mercredi-midi":"","Mercredi-soir":"","Jeudi-midi":"Guiche","Jeudi-soir":"Camembert maquereau salade","Vendredi-midi":"","Vendredi-soir":"Croque","Samedi-midi":"Pâtes épinard","Samedi-soir":"Coquillette jambon","Dimanche-midi":"Lentilles","Dimanche-soir":"Pâtes au thon"}},
     // S2
-    {meals: {"Lundi-midi":"","Lundi-soir":"","Mardi-midi":"Cordon bleu soupe salade","Mardi-soir":"","Mercredi-midi":"Tarte ricotta tomates","Mercredi-soir":"Bagel","Jeudi-midi":"","Jeudi-soir":"Poisson purée salade avocat","Vendredi-midi":"Crevette riz avocat","Vendredi-soir":"Pâtes épinard","Samedi-midi":"Poisson purée salade avocat","Samedi-soir":"Cassegrain pâtes mozza","Dimanche-midi":"Pâtes sauce tomate FU","Dimanche-soir":"Boudin pommes salade"}},
+    {startDate: new Date(baseMonday.getTime() + 7*86400000).toISOString(), meals: {"Lundi-midi":"","Lundi-soir":"","Mardi-midi":"Cordon bleu soupe salade","Mardi-soir":"","Mercredi-midi":"Tarte ricotta tomates","Mercredi-soir":"Bagel","Jeudi-midi":"","Jeudi-soir":"Poisson purée salade avocat","Vendredi-midi":"Crevette riz avocat","Vendredi-soir":"Pâtes épinard","Samedi-midi":"Poisson purée salade avocat","Samedi-soir":"Cassegrain pâtes mozza","Dimanche-midi":"Pâtes sauce tomate FU","Dimanche-soir":"Boudin pommes salade"}},
     // S3
-    {meals: {"Lundi-midi":"Boudin pommes salade","Lundi-soir":"Oeufs brouillés lard salade","Mardi-midi":"","Mardi-soir":"Guiche salade","Mercredi-midi":"Bagel","Mercredi-soir":"","Jeudi-midi":"","Jeudi-soir":"Poisson purée salade avocat","Vendredi-midi":"Pâtes saumon champignons","Vendredi-soir":"Poisson purée","Samedi-midi":"Crevettes tagliatelles","Samedi-soir":"Pâtes épinard","Dimanche-midi":"Pâtes au thon","Dimanche-soir":"Porc purée"}},
+    {startDate: new Date(baseMonday.getTime() + 14*86400000).toISOString(), meals: {"Lundi-midi":"Boudin pommes salade","Lundi-soir":"Oeufs brouillés lard salade","Mardi-midi":"","Mardi-soir":"Guiche salade","Mercredi-midi":"Bagel","Mercredi-soir":"","Jeudi-midi":"","Jeudi-soir":"Poisson purée salade avocat","Vendredi-midi":"Pâtes saumon champignons","Vendredi-soir":"Poisson purée","Samedi-midi":"Crevettes tagliatelles","Samedi-soir":"Pâtes épinard","Dimanche-midi":"Pâtes au thon","Dimanche-soir":"Porc purée"}},
     // S4
-    {meals: {"Lundi-midi":"","Lundi-soir":"","Mardi-midi":"","Mardi-soir":"","Mercredi-midi":"","Mercredi-soir":"","Jeudi-midi":"Steak frites salade","Jeudi-soir":"Poisson purée","Vendredi-midi":"Pâtes saumon champignons","Vendredi-soir":"","Samedi-midi":"","Samedi-soir":"Pâtes FU lard","Dimanche-midi":"Poisson purée","Dimanche-soir":"Pâtes saumon champignons"}}
+    {startDate: new Date(baseMonday.getTime() + 21*86400000).toISOString(), meals: {"Lundi-midi":"","Lundi-soir":"","Mardi-midi":"","Mardi-soir":"","Mercredi-midi":"","Mercredi-soir":"","Jeudi-midi":"Steak frites salade","Jeudi-soir":"Poisson purée","Vendredi-midi":"Pâtes saumon champignons","Vendredi-soir":"","Samedi-midi":"","Samedi-soir":"Pâtes FU lard","Dimanche-midi":"Poisson purée","Dimanche-soir":"Pâtes saumon champignons"}}
   ];
   data.weeks = spreadsheet;
   saveData(data);
@@ -605,12 +646,14 @@ function renderWeek() {
   }
   const idx = data.currentWeek;
   const week = data.weeks[idx];
-  document.getElementById('weekLabel').innerHTML = `Semaine ${idx + 1} <span>sur ${data.weeks.length}</span>`;
+  const range = formatWeekRange(week.startDate);
+  document.getElementById('weekLabel').innerHTML = `${range} <span>${idx + 1} sur ${data.weeks.length}</span>`;
 
   let html = '';
-  DAYS.forEach(day => {
+  DAYS.forEach((day, dayIndex) => {
+    const dayDate = formatDayDate(week.startDate, dayIndex);
     html += `<div class="day-card">
-      <div class="day-header"><div class="day-icon"></div>${day}</div>`;
+      <div class="day-header"><div class="day-icon"></div>${day} ${dayDate}</div>`;
     MEAL_TYPES.forEach(type => {
       const key = `${day}-${type}`;
       const val = week.meals[key] || '';
@@ -680,7 +723,15 @@ function addNewWeek() {
       emptyMeals[`${day}-${type}`] = '';
     });
   });
-  data.weeks.push({ meals: emptyMeals });
+  let startDate;
+  if (data.weeks.length > 0) {
+    const last = new Date(data.weeks[data.weeks.length - 1].startDate);
+    last.setDate(last.getDate() + 7);
+    startDate = last.toISOString();
+  } else {
+    startDate = getMonday(new Date()).toISOString();
+  }
+  data.weeks.push({ startDate, meals: emptyMeals });
   data.currentWeek = data.weeks.length - 1;
   saveData(data);
   renderWeek();
