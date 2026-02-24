@@ -836,10 +836,6 @@ function onMealBlur(input) {
     const list = document.getElementById(`ac-${key}`);
     list.classList.remove('show');
   }, 150);
-  const value = input.value.trim();
-  if (value) {
-    addMealToCatalog(value);
-  }
 }
 
 function selectAutocomplete(key, value) {
@@ -870,7 +866,6 @@ function handleAutocompleteKey(event, input) {
       const value = input.value.trim();
       if (value) {
         saveMealToWeek(key, value);
-        addMealToCatalog(value);
       }
       list.classList.remove('show');
       input.blur();
