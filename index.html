@@ -417,7 +417,7 @@
       position: fixed;
       bottom: calc(var(--tab-height) + 20px);
       left: 50%;
-      transform: translateX(-50%) translateY(100px);
+      transform: translateX(-50%) translateY(0);
       background: var(--text);
       color: white;
       padding: 12px 24px;
@@ -425,10 +425,12 @@
       font-size: 14px;
       font-weight: 500;
       z-index: 400;
-      transition: transform 0.3s ease;
+      transition: opacity 0.3s ease;
       white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
     }
-    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.show { opacity: 1; pointer-events: auto; }
 
     /* Settings / Utils */
     .stats {
