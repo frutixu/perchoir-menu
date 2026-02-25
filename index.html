@@ -1044,11 +1044,16 @@ function confirmReset() {
 }
 
 // ===== Toast =====
+let toastTimer = null;
 function showToast(msg) {
   const t = document.getElementById('toast');
+  if (toastTimer) clearTimeout(toastTimer);
+  t.classList.remove('show');
+  // Force reflow so the remove/add triggers the transition again
+  void t.offsetWidth;
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  toastTimer = setTimeout(() => { t.classList.remove('show'); toastTimer = null; }, 3000);
 }
 </script>
 </body>
