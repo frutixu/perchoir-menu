@@ -1,0 +1,98 @@
+{
+  "rules": {
+    "perchoir": {
+      ".read": true,
+      ".write": true,
+      "meals": {
+        ".validate": "newData.isString() || newData.hasChildren()",
+        "$meal": {
+          ".validate": "newData.isString() && newData.val().length < 200"
+        }
+      },
+      "weeks": {
+        "$week": {
+          ".validate": "newData.hasChildren()",
+          "startDate": { ".validate": "newData.isString() && newData.val().length < 100" },
+          "meals": {
+            "$slot": {
+              ".validate": "newData.isString() && newData.val().length < 200"
+            }
+          },
+          "$other": { ".validate": false }
+        }
+      },
+      "urls": {
+        "$meal": {
+          ".validate": "newData.isString() && newData.val().length < 1000"
+        }
+      },
+      "$other": {
+        ".validate": false
+      }
+    },
+    "table-junot": {
+      ".read": true,
+      ".write": true,
+      "meals": {
+        ".validate": "newData.isString() || newData.hasChildren()",
+        "$meal": {
+          ".validate": "newData.isString() && newData.val().length < 200"
+        }
+      },
+      "weeks": {
+        "$week": {
+          ".validate": "newData.hasChildren()",
+          "startDate": { ".validate": "newData.isString() && newData.val().length < 100" },
+          "meals": {
+            "$slot": {
+              ".validate": "newData.isString() && newData.val().length < 200"
+            }
+          },
+          "$other": { ".validate": false }
+        }
+      },
+      "urls": {
+        "$meal": {
+          ".validate": "newData.isString() && newData.val().length < 1000"
+        }
+      },
+      "$other": {
+        ".validate": false
+      }
+    },
+    "cabin-menu": {
+      ".read": true,
+      ".write": true,
+      "meals": {
+        ".validate": "newData.isString() || newData.hasChildren()",
+        "$meal": {
+          ".validate": "newData.isString() && newData.val().length < 200"
+        }
+      },
+      "weeks": {
+        "$week": {
+          ".validate": "newData.hasChildren()",
+          "startDate": { ".validate": "newData.isString() && newData.val().length < 100" },
+          "meals": {
+            "$slot": {
+              ".validate": "newData.isString() && newData.val().length < 200"
+            }
+          },
+          "$other": { ".validate": false }
+        }
+      },
+      "urls": {
+        "$meal": {
+          ".validate": "newData.isString() && newData.val().length < 1000"
+        }
+      },
+      "$other": {
+        ".validate": false
+      }
+    },
+    "$other": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}
