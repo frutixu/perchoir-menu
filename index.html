@@ -449,6 +449,97 @@
     .stat-value { font-size: 28px; font-weight: 800; color: var(--accent); }
     .stat-label { font-size: 12px; color: var(--text-light); margin-top: 4px; }
 
+    /* Shopping List */
+    .shopping-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .shopping-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-family: inherit;
+      background: var(--card);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .shopping-input:focus { border-color: var(--accent); }
+    .shopping-list { list-style: none; }
+    .shopping-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      background: var(--card);
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+      box-shadow: var(--shadow);
+      font-size: 15px;
+      transition: all 0.3s;
+      gap: 12px;
+    }
+    .shopping-item.checked {
+      opacity: 0.45;
+      background: #f5f5f5;
+      box-shadow: none;
+    }
+    .shopping-item.checked .shopping-text {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+    .shopping-checkbox {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 2px solid var(--border);
+      background: var(--card);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .shopping-checkbox:hover { border-color: var(--accent); }
+    .shopping-checkbox.checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .shopping-checkbox.checked::after {
+      content: '';
+      width: 6px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+      margin-bottom: 2px;
+    }
+    .shopping-text { flex: 1; }
+    .shopping-delete {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .shopping-delete:hover { background: #ffe0e0; color: #ff6b6b; }
+    .shopping-checked-at {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
     @media (min-width: 600px) {
       .page { max-width: 540px; margin: 0 auto; }
     }
@@ -484,6 +575,15 @@
   <ul class="meal-list" id="mealList"></ul>
 </div>
 
+<!-- Shopping Page -->
+<div class="page" id="pageShopping">
+  <div class="shopping-header">
+    <input type="text" class="shopping-input" id="shoppingInput" placeholder="Ajouter un article..." onkeydown="if(event.key==='Enter') addShoppingItem()">
+    <button class="add-meal-btn" onclick="addShoppingItem()" aria-label="Ajouter">+</button>
+  </div>
+  <ul class="shopping-list" id="shoppingList"></ul>
+</div>
+
 <!-- Settings Page -->
 <div class="page" id="pageSettings">
   <div class="stats" id="statsGrid"></div>
@@ -504,6 +604,10 @@
   <button class="tab-btn" onclick="switchTab('meals')" id="tabMeals">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
     Repas
+  </button>
+  <button class="tab-btn" onclick="switchTab('shopping')" id="tabShopping">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+    Courses
   </button>
   <button class="tab-btn" onclick="switchTab('settings')" id="tabSettings">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.32 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -601,9 +705,9 @@ let firebaseReady = false;
 let suppressSync = false;
 
 function saveData() {
-  // Write shared data to Firebase (meals + weeks only, not currentWeek)
+  // Update only meals + weeks — never touch shopping or other children
   suppressSync = true;
-  dbRef.set({ meals: data.meals, weeks: data.weeks }).then(() => {
+  dbRef.update({ meals: data.meals, weeks: data.weeks }).then(() => {
     suppressSync = false;
   }).catch(() => { suppressSync = false; });
 }
@@ -612,10 +716,10 @@ function saveData() {
 dbRef.on('value', (snapshot) => {
   if (suppressSync) return;
   const val = snapshot.val();
-  if (!val) {
+  if (!val || (!val.meals && !val.weeks)) {
     // DB is empty — seed it with defaults
     data = buildDefaultData();
-    dbRef.set({ meals: data.meals, weeks: data.weeks });
+    dbRef.update({ meals: data.meals, weeks: data.weeks });
     firebaseReady = true;
     renderCurrentView();
     return;
@@ -642,6 +746,7 @@ function renderCurrentView() {
   if (!activePage) { renderWeek(); return; }
   if (activePage.id === 'pagePlanning') renderWeek();
   else if (activePage.id === 'pageMeals') renderMeals();
+  else if (activePage.id === 'pageShopping') renderShopping();
   else if (activePage.id === 'pageSettings') renderStats();
 }
 
@@ -660,6 +765,11 @@ function switchTab(tab) {
     document.getElementById('tabMeals').classList.add('active');
     document.getElementById('headerSub').textContent = data.meals.length + ' repas disponibles';
     renderMeals();
+  } else if (tab === 'shopping') {
+    document.getElementById('pageShopping').classList.add('active');
+    document.getElementById('tabShopping').classList.add('active');
+    document.getElementById('headerSub').textContent = 'Liste de courses';
+    renderShopping();
   } else if (tab === 'settings') {
     document.getElementById('pageSettings').classList.add('active');
     document.getElementById('tabSettings').classList.add('active');
@@ -1043,6 +1153,89 @@ function confirmReset() {
     renderWeek();
     showToast('Données réinitialisées');
   }
+}
+
+// ===== Shopping List =====
+const shoppingRef = dbRef.child('shopping');
+let shoppingItems = [];
+
+shoppingRef.on('value', (snapshot) => {
+  const val = snapshot.val();
+  shoppingItems = val ? Object.values(val) : [];
+  cleanExpiredItems();
+  renderShopping();
+});
+
+function cleanExpiredItems() {
+  const now = Date.now();
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const expired = shoppingItems.filter(item => item.checked && item.checkedAt && (now - item.checkedAt) > DAY_MS);
+  if (expired.length > 0) {
+    const updates = {};
+    expired.forEach(item => { updates[item.id] = null; });
+    shoppingRef.update(updates);
+  }
+}
+
+function renderShopping() {
+  const list = document.getElementById('shoppingList');
+  if (!list) return;
+  const now = Date.now();
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const active = shoppingItems.filter(item => !item.checked || !item.checkedAt || (now - item.checkedAt) <= DAY_MS);
+  active.sort((a, b) => {
+    if (a.checked && !b.checked) return 1;
+    if (!a.checked && b.checked) return -1;
+    return 0;
+  });
+
+  if (active.length === 0) {
+    list.innerHTML = '<div class="empty-state"><p>La liste est vide</p></div>';
+    return;
+  }
+
+  list.innerHTML = active.map(item => {
+    const checkedClass = item.checked ? ' checked' : '';
+    const timeAgo = item.checked && item.checkedAt ? formatTimeAgo(item.checkedAt) : '';
+    return `<li class="shopping-item${checkedClass}">
+      <div class="shopping-checkbox${checkedClass}" onclick="toggleShoppingItem('${item.id}')"></div>
+      <span class="shopping-text">${escapeHtml(item.text)}</span>
+      ${timeAgo ? `<span class="shopping-checked-at">${timeAgo}</span>` : ''}
+      <button class="shopping-delete" onclick="deleteShoppingItem('${item.id}')" aria-label="Supprimer">&times;</button>
+    </li>`;
+  }).join('');
+}
+
+function formatTimeAgo(timestamp) {
+  const diff = Date.now() - timestamp;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "à l'instant";
+  if (mins < 60) return `il y a ${mins}min`;
+  const hours = Math.floor(mins / 60);
+  return `il y a ${hours}h`;
+}
+
+function addShoppingItem() {
+  const input = document.getElementById('shoppingInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  shoppingRef.child(id).set({ id, text, checked: false, checkedAt: null });
+  input.value = '';
+}
+
+function toggleShoppingItem(id) {
+  const item = shoppingItems.find(i => i.id === id);
+  if (!item) return;
+  if (item.checked) {
+    shoppingRef.child(id).update({ checked: false, checkedAt: null });
+  } else {
+    shoppingRef.child(id).update({ checked: true, checkedAt: Date.now() });
+  }
+}
+
+function deleteShoppingItem(id) {
+  shoppingRef.child(id).remove();
 }
 
 // ===== Toast =====
