@@ -86,6 +86,16 @@
           ".validate": "newData.isString() && newData.val().length < 1000"
         }
       },
+      "shopping": {
+        "$item": {
+          ".validate": "newData.hasChildren(['id','text','checked'])",
+          "id": { ".validate": "newData.isString() && newData.val().length < 50" },
+          "text": { ".validate": "newData.isString() && newData.val().length < 300" },
+          "checked": { ".validate": "newData.isBoolean()" },
+          "checkedAt": { ".validate": "newData.isNumber() || newData.val() === null" },
+          "$other": { ".validate": false }
+        }
+      },
       "$other": {
         ".validate": false
       }
